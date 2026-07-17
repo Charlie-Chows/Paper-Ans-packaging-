@@ -1,0 +1,1188 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0" />
+    <title>Management Console | Artic Paper</title>
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Space+Grotesk:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+
+    <!-- GSAP -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+
+    <style>
+        /* ============================================================
+           ROOT & BEIGE THEME
+           ============================================================ */
+        :root {
+            --bg-beige: #f5f2eb;
+            --bg-light: #faf8f5;
+            --white: #ffffff;
+            --text-dark: #1e293b;
+            --text-muted: #64748b;
+            --accent: #0f766e; /* Deep active teal */
+            --accent-light: #14b8a6;
+            --accent-dark: #115e59;
+            --accent-glow: rgba(13, 148, 136, 0.08);
+            --border: rgba(0, 0, 0, 0.06);
+            --radius: 16px;
+            --radius-sm: 10px;
+            --radius-xs: 6px;
+            --radius-full: 9999px;
+            --font-body: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            --font-alt: 'Space Grotesk', sans-serif;
+            --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+        html, body {
+            width: 100%;
+            height: 100%;
+            overflow-x: hidden;
+            background: var(--bg-beige);
+            color: var(--text-dark);
+            font-family: var(--font-body);
+            -webkit-font-smoothing: antialiased;
+        }
+
+        .app-layout {
+            display: flex;
+            height: 100vh;
+            width: 100vw;
+            overflow: hidden;
+            position: relative;
+        }
+
+        /* Sidebar - Desktop */
+        .sidebar {
+            width: 280px;
+            background: var(--white);
+            border-right: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            padding: 36px 24px;
+            flex-shrink: 0;
+            z-index: 100;
+        }
+        .sidebar-logo {
+            margin-bottom: 48px;
+            display: flex;
+            justify-content: center;
+        }
+        .sidebar-logo img {
+            height: 80px;
+            width: auto;
+            border-radius: 8px;
+            filter: brightness(0) saturate(100%) invert(35%) sepia(35%) saturate(1500%) hue-rotate(135deg) brightness(95%) contrast(90%);
+        }
+        .sidebar-menu {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            flex: 1;
+        }
+        .menu-item {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            padding: 14px 20px;
+            color: var(--text-muted);
+            font-family: var(--font-alt);
+            font-size: 0.88rem;
+            font-weight: 500;
+            border-radius: var(--radius-sm);
+            transition: all 0.3s;
+            cursor: pointer;
+            text-decoration: none;
+        }
+        .menu-item i {
+            font-size: 1.1rem;
+            width: 20px;
+            text-align: center;
+        }
+        .menu-item:hover, .menu-item.active {
+            color: var(--accent);
+            background: var(--accent-glow);
+        }
+        .menu-item.active {
+            color: var(--accent-dark);
+            font-weight: 700;
+            box-shadow: inset 3px 0 0 var(--accent);
+        }
+        .sidebar-footer {
+            border-top: 1px solid var(--border);
+            padding-top: 24px;
+        }
+        .logout-btn {
+            color: #ef4444 !important;
+            text-decoration: none;
+        }
+        .logout-btn:hover {
+            background: rgba(239, 68, 68, 0.06) !important;
+            color: #dc2626 !important;
+        }
+
+        /* Mobile Header */
+        .mobile-header {
+            display: none;
+            height: 80px;
+            background: var(--white);
+            border-bottom: 1px solid var(--border);
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 24px;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            z-index: 200;
+        }
+        .mobile-header .logo img {
+            height: 70px;
+            width: auto;
+            border-radius: 6px;
+            filter: brightness(0) saturate(100%) invert(35%) sepia(35%) saturate(1500%) hue-rotate(135deg) brightness(95%) contrast(90%);
+        }
+        .hamburger-btn {
+            background: rgba(0,0,0,0.02);
+            border: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+            cursor: pointer;
+            padding: 10px;
+            border-radius: var(--radius-xs);
+        }
+        .hamburger-btn span {
+            display: block;
+            width: 20px;
+            height: 2px;
+            background: var(--text-dark);
+            transition: 0.3s;
+        }
+        .hamburger-btn.active span:nth-child(1) { transform: rotate(45deg) translate(5px, 5px); }
+        .hamburger-btn.active span:nth-child(2) { opacity: 0; }
+        .hamburger-btn.active span:nth-child(3) { transform: rotate(-45deg) translate(5px, -5px); }
+
+        /* Mobile Menu Overlay */
+        .mobile-menu-overlay {
+            position: fixed;
+            inset: 0;
+            top: 80px;
+            background: var(--bg-beige);
+            z-index: 190;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+            padding: 40px 24px;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.4s var(--ease-out-expo);
+            overflow-y: auto;
+        }
+        .mobile-menu-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+        .mobile-menu {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+        .mobile-menu-item {
+            font-family: var(--font-alt);
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            padding: 14px 20px;
+            border-radius: var(--radius-sm);
+            background: var(--white);
+            border: 1px solid var(--border);
+            text-decoration: none;
+        }
+        .mobile-menu-item.active {
+            color: var(--accent);
+            border-color: var(--accent);
+            background: var(--accent-glow);
+        }
+        .mobile-menu-overlay .logout-btn-mobile {
+            margin-top: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            padding: 16px;
+            background: #ef4444;
+            color: var(--white) !important;
+            font-family: var(--font-alt);
+            font-weight: 700;
+            text-transform: uppercase;
+            font-size: 0.9rem;
+            letter-spacing: 1px;
+            border-radius: var(--radius-full);
+            text-decoration: none !important;
+            box-shadow: 0 4px 12px rgba(239, 68, 68, 0.2);
+            transition: background 0.3s;
+        }
+        .mobile-menu-overlay .logout-btn-mobile:hover {
+            background: #dc2626;
+        }
+
+        /* Content Area */
+        .content-area {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            overflow-y: auto;
+            padding: 48px;
+            position: relative;
+            max-width: 100%;
+            overflow-x: hidden;
+        }
+
+        /* Top Header Details */
+        .content-top-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 40px;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 24px;
+        }
+        .welcome-hero h1 {
+            font-size: 2.2rem;
+            font-weight: 800;
+            color: var(--text-dark);
+            letter-spacing: -0.5px;
+        }
+        .welcome-hero h1 span {
+            color: var(--accent);
+        }
+        .welcome-hero p {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            margin-top: 4px;
+            font-weight: 400;
+        }
+
+        .user-profile {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+        .user-avatar {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            background: var(--accent-glow);
+            border: 1px solid var(--accent);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--accent);
+            font-weight: 700;
+            font-family: var(--font-alt);
+        }
+        .user-info-text h4 {
+            font-size: 0.95rem;
+            font-weight: 700;
+            color: var(--text-dark);
+        }
+        .user-info-text p {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+        }
+
+        /* Sections Switch styling */
+        .dashboard-section {
+            display: none;
+            flex-direction: column;
+            gap: 32px;
+            opacity: 0;
+            width: 100%;
+        }
+        .dashboard-section.active {
+            display: flex;
+            opacity: 1;
+        }
+
+        /* ============================================================
+           DASHBOARD WIDGETS & CARDS
+           ============================================================ */
+        .widget-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 24px;
+            width: 100%;
+        }
+        .widget-card {
+            background: var(--white);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 28px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.015);
+        }
+        .widget-card.full-width {
+            grid-column: span 4;
+        }
+        .widget-card.three-quarters {
+            grid-column: span 3;
+        }
+        .widget-card.two-thirds {
+            grid-column: span 2;
+        }
+
+        .widget-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 14px;
+        }
+        .widget-header h3 {
+            font-size: 1.15rem;
+            font-weight: 700;
+            color: var(--text-dark);
+        }
+
+        /* Stats Blocks */
+        .stats-block {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+        .stats-icon {
+            width: 56px;
+            height: 56px;
+            border-radius: var(--radius-sm);
+            background: var(--accent-glow);
+            color: var(--accent);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.4rem;
+        }
+        .stats-details h3 {
+            font-size: 1.8rem;
+            font-family: var(--font-alt);
+            font-weight: 700;
+            color: var(--text-dark);
+        }
+        .stats-details p {
+            font-size: 0.72rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-top: 4px;
+            font-weight: 600;
+        }
+
+        /* Modern flat table */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.88rem;
+            text-align: left;
+        }
+        th, td {
+            padding: 14px 16px;
+            border-bottom: 1px solid var(--border);
+        }
+        th {
+            font-family: var(--font-alt);
+            font-size: 0.72rem;
+            text-transform: uppercase;
+            color: var(--text-muted);
+            letter-spacing: 0.5px;
+            font-weight: 700;
+        }
+        td {
+            font-weight: 400;
+            color: var(--text-dark);
+        }
+
+        .status-badge {
+            font-family: var(--font-alt);
+            font-size: 0.62rem;
+            text-transform: uppercase;
+            font-weight: 700;
+            padding: 4px 10px;
+            border-radius: var(--radius-full);
+            background: var(--accent-glow);
+            color: var(--accent-dark);
+            display: inline-block;
+            border: 1px solid rgba(15, 118, 110, 0.15);
+        }
+        .status-badge.new {
+            background: rgba(249, 115, 22, 0.1);
+            color: #d97706;
+            border-color: rgba(249, 115, 22, 0.2);
+        }
+        .status-badge.declined {
+            background: rgba(239, 68, 68, 0.1);
+            color: #ef4444;
+            border-color: rgba(239, 68, 68, 0.15);
+        }
+        .status-badge.approved {
+            background: rgba(8, 145, 178, 0.1);
+            color: #0e7490;
+            border-color: rgba(8, 145, 178, 0.15);
+        }
+
+        .btn-action {
+            padding: 6px 12px;
+            font-family: var(--font-alt);
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-weight: 700;
+            border-radius: var(--radius-xs);
+            border: 1px solid transparent;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .btn-approve {
+            background: rgba(8, 145, 178, 0.1);
+            color: #0f766e;
+            border-color: rgba(8, 145, 178, 0.2);
+        }
+        .btn-approve:hover {
+            background: var(--accent);
+            color: var(--white);
+        }
+        .btn-decline {
+            background: rgba(239, 68, 68, 0.08);
+            color: #ef4444;
+            border-color: rgba(239, 68, 68, 0.15);
+        }
+        .btn-decline:hover {
+            background: #ef4444;
+            color: var(--white);
+        }
+
+        /* Flat Column Bar Graph */
+        .bar-chart-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            height: 220px;
+            padding: 20px 10px 10px;
+        }
+        .bar-wrapper {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            flex: 1;
+            height: 100%;
+            justify-content: flex-end;
+            gap: 8px;
+        }
+        .bar-track {
+            width: 32px;
+            height: 100%;
+            background: var(--bg-beige);
+            border-radius: var(--radius-xs);
+            display: flex;
+            align-items: flex-end;
+            overflow: hidden;
+            position: relative;
+        }
+        .bar-fill {
+            width: 100%;
+            background: linear-gradient(180deg, var(--accent-light) 0%, var(--accent) 100%);
+            height: 0;
+            transition: height 1.2s var(--ease-out-expo);
+            border-radius: var(--radius-xs) var(--radius-xs) 0 0;
+        }
+        .bar-value {
+            font-size: 0.7rem;
+            font-weight: 700;
+            color: var(--accent-dark);
+            margin-bottom: 2px;
+            font-family: var(--font-alt);
+        }
+        .bar-label {
+            font-size: 0.72rem;
+            color: var(--text-muted);
+            font-family: var(--font-alt);
+            font-weight: 600;
+        }
+
+        /* Material progress inventory stock logs */
+        .stock-progress-list {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        .stock-progress-item {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        .stock-meta {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.85rem;
+        }
+        .stock-meta h4 {
+            font-weight: 600;
+            color: var(--text-dark);
+        }
+        .stock-meta span {
+            color: var(--text-muted);
+            font-family: var(--font-alt);
+            font-weight: 600;
+        }
+        .progress-bar-track {
+            height: 6px;
+            background: var(--border);
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        .progress-bar-fill {
+            height: 100%;
+            background: var(--accent);
+            border-radius: 10px;
+            width: 0;
+            transition: width 1.5s var(--ease-out-expo);
+        }
+
+        /* Settings lists */
+        .settings-list {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+        .settings-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 16px;
+            background: var(--bg-light);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+        }
+        .settings-info h5 {
+            font-size: 0.88rem;
+            font-weight: 700;
+            color: var(--text-dark);
+            margin-bottom: 2px;
+        }
+        .settings-info p {
+            font-size: 0.72rem;
+            color: var(--text-muted);
+        }
+        /* Toggle Switch */
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 44px;
+            height: 24px;
+        }
+        .switch input {
+            opacity: 0; width: 0; height: 0;
+        }
+        .slider {
+            position: absolute; cursor: pointer; inset: 0;
+            background-color: var(--border);
+            border-radius: 24px;
+            transition: .4s;
+        }
+        .slider:before {
+            position: absolute; content: ""; height: 16px; width: 16px;
+            left: 4px; bottom: 4px; background-color: var(--white);
+            border-radius: 50%;
+            transition: .4s;
+        }
+        input:checked + .slider {
+            background-color: var(--accent);
+        }
+        input:checked + .slider:before {
+            transform: translateX(20px);
+        }
+
+        /* Search input bar */
+        .search-bar {
+            display: flex;
+            background: var(--white);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-xs);
+            padding: 10px 16px;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 24px;
+        }
+        .search-bar input {
+            flex: 1;
+            background: transparent;
+            border: none;
+            color: var(--text-dark);
+            font-family: inherit;
+            font-size: 0.88rem;
+        }
+        .search-bar input:focus {
+            outline: none;
+        }
+        .search-bar i {
+            color: var(--text-muted);
+        }
+
+        @media (max-width: 992px) {
+            .mobile-header { display: flex; }
+            .sidebar { display: none; }
+            .app-layout { flex-direction: column; padding-top: 80px; height: 100vh; overflow-y: auto; width: 100vw; overflow-x: hidden; }
+            .content-area { padding: 32px 20px; height: auto; overflow-y: visible; }
+            .content-top-header { flex-direction: column; align-items: flex-start; gap: 16px; margin-bottom: 24px; }
+            .widget-grid { grid-template-columns: 1fr; }
+            .widget-card.full-width, .widget-card.three-quarters, .widget-card.two-thirds { grid-column: span 1; }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="app-layout">
+        <!-- Sidebar - Desktop -->
+        <aside class="sidebar">
+            <div class="sidebar-logo">
+                <a href="index.html"><img src="logo.webp" alt="Artic Paper Logo" /></a>
+            </div>
+            <nav class="sidebar-menu">
+                <div class="menu-item active" data-target="overview"><i class="fas fa-chart-line"></i> Operations Console</div>
+                <div class="menu-item" data-target="inquiries"><i class="fas fa-file-invoice-dollar"></i> Requests Queue</div>
+                <div class="menu-item" data-target="inventory"><i class="fas fa-warehouse"></i> Warehouse Stock</div>
+                <div class="menu-item" data-target="partners"><i class="fas fa-users-gear"></i> Client Directory</div>
+                <div class="menu-item" data-target="operations"><i class="fas fa-sliders"></i> System Parameters</div>
+            </nav>
+            <div class="sidebar-footer">
+                <a href="index.html" class="menu-item logout-btn"><i class="fas fa-sign-out-alt"></i> Logout</a>
+            </div>
+        </aside>
+
+        <!-- Mobile Top Header -->
+        <header class="mobile-header">
+            <a href="index.html" class="logo"><img src="logo.webp" alt="Artic Paper Logo" /></a>
+            <button class="hamburger-btn" id="mobileMenuBtn" aria-label="Toggle Navigation">
+                <span></span><span></span><span></span>
+            </button>
+        </header>
+
+        <!-- Mobile Menu Overlay -->
+        <div class="mobile-menu-overlay" id="mobileOverlay">
+            <nav class="mobile-menu">
+                <div class="mobile-menu-item active" data-target="overview"><i class="fas fa-chart-line"></i> Operations Console</div>
+                <div class="mobile-menu-item" data-target="inquiries"><i class="fas fa-file-invoice-dollar"></i> Requests Queue</div>
+                <div class="mobile-menu-item" data-target="inventory"><i class="fas fa-warehouse"></i> Warehouse Stock</div>
+                <div class="mobile-menu-item" data-target="partners"><i class="fas fa-users-gear"></i> Client Directory</div>
+                <div class="mobile-menu-item" data-target="operations"><i class="fas fa-sliders"></i> System Parameters</div>
+                <a href="index.html" class="logout-btn-mobile"><i class="fas fa-sign-out-alt"></i> Logout</a>
+            </nav>
+        </div>
+
+        <!-- Main Content Area -->
+        <main class="content-area">
+            <!-- Top Header Details -->
+            <div class="content-top-header">
+                <div class="welcome-hero">
+                    <h1>Hello, <span id="usernameDisplay">Admin</span></h1>
+                    <p>Central management dashboard for custom runs, stock, and templates</p>
+                </div>
+                <div class="user-profile">
+                    <div class="user-avatar" id="avatarDisplay">AD</div>
+                    <div class="user-info-text">
+                        <h4 id="profileNameDisplay">Admin Console</h4>
+                        <p>Super Administrator</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SECTION 1: OVERVIEW -->
+            <section class="dashboard-section active" id="sect-overview">
+                <div class="widget-grid">
+                    <div class="widget-card">
+                        <div class="stats-block">
+                            <div class="stats-icon"><i class="fas fa-envelope-open-text"></i></div>
+                            <div class="stats-details">
+                                <h3 id="quotesCount">15</h3>
+                                <p>New Inquiries</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="widget-card">
+                        <div class="stats-block">
+                            <div class="stats-icon"><i class="fas fa-gears"></i></div>
+                            <div class="stats-details">
+                                <h3>18</h3>
+                                <p>Press Runs</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="widget-card">
+                        <div class="stats-block">
+                            <div class="stats-icon"><i class="fas fa-people-carry-box"></i></div>
+                            <div class="stats-details">
+                                <h3>342</h3>
+                                <p>Client Partners</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="widget-card">
+                        <div class="stats-block">
+                            <div class="stats-icon"><i class="fas fa-truck-ramp-box"></i></div>
+                            <div class="stats-details">
+                                <h3>98.2%</h3>
+                                <p>Dispatch Yield</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Flat Column Bar Graph for Corporate Yield Analytics -->
+                    <div class="widget-card three-quarters">
+                        <div class="widget-header">
+                            <h3>Corporate Production Yield (Runs)</h3>
+                            <span style="font-size:0.72rem;color:var(--text-muted);font-family:var(--font-alt);font-weight:700;">MONTHLY FABRICATIONS</span>
+                        </div>
+                        <div class="bar-chart-container" id="adminBarChart">
+                            <div class="bar-wrapper">
+                                <div class="bar-value">54 Runs</div>
+                                <div class="bar-track"><div class="bar-fill" data-height="55%"></div></div>
+                                <div class="bar-label">Jan</div>
+                            </div>
+                            <div class="bar-wrapper">
+                                <div class="bar-value">72 Runs</div>
+                                <div class="bar-track"><div class="bar-fill" data-height="70%"></div></div>
+                                <div class="bar-label">Feb</div>
+                            </div>
+                            <div class="bar-wrapper">
+                                <div class="bar-value">95 Runs</div>
+                                <div class="bar-track"><div class="bar-fill" data-height="95%"></div></div>
+                                <div class="bar-label">Mar</div>
+                            </div>
+                            <div class="bar-wrapper">
+                                <div class="bar-value">62 Runs</div>
+                                <div class="bar-track"><div class="bar-fill" data-height="62%"></div></div>
+                                <div class="bar-label">Apr</div>
+                            </div>
+                            <div class="bar-wrapper">
+                                <div class="bar-value">110 Runs</div>
+                                <div class="bar-track"><div class="bar-fill" data-height="100%"></div></div>
+                                <div class="bar-label">May</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Press Run Capacity Share -->
+                    <div class="widget-card">
+                        <div class="widget-header">
+                            <h3>Press Status</h3>
+                        </div>
+                        <div style="display:flex;align-items:center;justify-content:center;height:220px;flex-direction:column;gap:16px;">
+                            <i class="fas fa-print" style="font-size:3rem;color:var(--accent);"></i>
+                            <h4 style="font-family:var(--font-alt);font-size:1.6rem;font-weight:700;color:var(--accent-dark);">82%</h4>
+                            <p style="font-size:0.72rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:1px;text-align:center;font-weight:600;">Active Load Capacity</p>
+                        </div>
+                    </div>
+
+                    <!-- System Audits Logs table -->
+                    <div class="widget-card full-width" style="overflow-x:auto;">
+                        <div class="widget-header">
+                            <h3>Operations Audit Log</h3>
+                        </div>
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Audit Code</th>
+                                    <th>Action Logged</th>
+                                    <th>Operator</th>
+                                    <th>Date</th>
+                                    <th style="text-align:right;">Risk Rating</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>#AUD-8920</td>
+                                    <td>Standard MOQ validation rules checked (500 limit)</td>
+                                    <td>System Administrator</td>
+                                    <td>July 14, 2026</td>
+                                    <td style="text-align:right;color:#0f766e;font-weight:700;">LOW RISK</td>
+                                </tr>
+                                <tr>
+                                    <td>#AUD-8914</td>
+                                    <td>Template dielines library updated (Folding Bottom box v1.4)</td>
+                                    <td>Design Admin</td>
+                                    <td>July 12, 2026</td>
+                                    <td style="text-align:right;color:#0f766e;font-weight:700;">LOW RISK</td>
+                                </tr>
+                                <tr>
+                                    <td>#AUD-8890</td>
+                                    <td>Rotary Die Cutter scheduling integrated</td>
+                                    <td>Operations Lead</td>
+                                    <td>July 10, 2026</td>
+                                    <td style="text-align:right;color:#0f766e;font-weight:700;">LOW RISK</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- SECTION 2: REQUESTS QUEUE -->
+            <section class="dashboard-section" id="sect-inquiries">
+                <div class="widget-card full-width" style="overflow-x:auto;">
+                    <div class="widget-header">
+                        <h3>Client Custom Inquiries Queue</h3>
+                    </div>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Client Partner</th>
+                                <th>Specifications</th>
+                                <th>MOQ Target</th>
+                                <th>Status</th>
+                                <th style="text-align:right;">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="requestsTableBody">
+                            <tr id="row-jane">
+                                <td>Jane Doe (Aura Paris)</td>
+                                <td>Luxury Folding Box (Laminated Greyboard)</td>
+                                <td>2,500 units</td>
+                                <td><span class="status-badge new" id="badge-jane">Pending Quote</span></td>
+                                <td style="text-align:right;display:flex;gap:10px;justify-content:flex-end;" id="actions-jane">
+                                    <button class="btn-action btn-approve" onclick="updateInquiryStatus('jane', 'approved')">Approve Quote</button>
+                                    <button class="btn-action btn-decline" onclick="updateInquiryStatus('jane', 'declined')">Decline</button>
+                                </td>
+                            </tr>
+                            <tr id="row-alex">
+                                <td>Alex Vance (Stellar Glass)</td>
+                                <td>Rigid Greyboard Outer Case 1200gsm</td>
+                                <td>1,000 units</td>
+                                <td><span class="status-badge new" id="badge-alex">Pending Quote</span></td>
+                                <td style="text-align:right;display:flex;gap:10px;justify-content:flex-end;" id="actions-alex">
+                                    <button class="btn-action btn-approve" onclick="updateInquiryStatus('alex', 'approved')">Approve Quote</button>
+                                    <button class="btn-action btn-decline" onclick="updateInquiryStatus('alex', 'declined')">Decline</button>
+                                </td>
+                            </tr>
+                            <tr id="row-eco">
+                                <td>Sophie L. (EcoShoes)</td>
+                                <td>SBS Solid Bleached Sulfate Box 400gsm</td>
+                                <td>10,000 units</td>
+                                <td><span class="status-badge new" id="badge-eco">Pending Quote</span></td>
+                                <td style="text-align:right;display:flex;gap:10px;justify-content:flex-end;" id="actions-eco">
+                                    <button class="btn-action btn-approve" onclick="updateInquiryStatus('eco', 'approved')">Approve Quote</button>
+                                    <button class="btn-action btn-decline" onclick="updateInquiryStatus('eco', 'declined')">Decline</button>
+                                </td>
+                            </tr>
+                            <tr id="row-mark">
+                                <td>Mark R. (Urban Tea)</td>
+                                <td>Kraft Standard Mailing Boxes</td>
+                                <td>5,000 units</td>
+                                <td><span class="status-badge approved">Approved</span></td>
+                                <td style="text-align:right;color:var(--text-muted);font-size:0.8rem;font-family:var(--font-alt);font-weight:700;">PROCESSED</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- SECTION 3: INVENTORY -->
+            <section class="dashboard-section" id="sect-inventory">
+                <div class="widget-card full-width">
+                    <div class="widget-header">
+                        <h3>Raw Board & Liner Sheet Inventory</h3>
+                    </div>
+                    <div class="stock-progress-list">
+                        <!-- Item 1 -->
+                        <div class="stock-progress-item">
+                            <div class="stock-meta">
+                                <h4>Kraft Cardboard Sheets 350gsm</h4>
+                                <span>82% &middot; 4,100 Sheets (Standard Level)</span>
+                            </div>
+                            <div class="progress-bar-track">
+                                <div class="progress-bar-fill" data-progress="82" style="background:var(--accent);"></div>
+                            </div>
+                        </div>
+                        <!-- Item 2 -->
+                        <div class="stock-progress-item">
+                            <div class="stock-meta">
+                                <h4>Solid Bleached Sulfate (SBS) 400gsm</h4>
+                                <span>58% &middot; 2,900 Sheets (Standard Level)</span>
+                            </div>
+                            <div class="progress-bar-track">
+                                <div class="progress-bar-fill" data-progress="58" style="background:var(--accent-dark);"></div>
+                            </div>
+                        </div>
+                        <!-- Item 3 -->
+                        <div class="stock-progress-item">
+                            <div class="stock-meta">
+                                <h4>Greyboard Lining Sheets 1200gsm</h4>
+                                <span>24% &middot; 1,200 Sheets (Low Level Alert)</span>
+                            </div>
+                            <div class="progress-bar-track">
+                                <div class="progress-bar-fill" data-progress="24" style="background:#ff5555;"></div>
+                            </div>
+                        </div>
+                        <!-- Item 4 -->
+                        <div class="stock-progress-item">
+                            <div class="stock-meta">
+                                <h4>Corrugated B-Flute Protective Liners</h4>
+                                <span>91% &middot; 4,550 Sheets (Stocked)</span>
+                            </div>
+                            <div class="progress-bar-track">
+                                <div class="progress-bar-fill" data-progress="91" style="background:var(--accent-light);"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- SECTION 4: PARTNERS -->
+            <section class="dashboard-section" id="sect-partners">
+                <div class="widget-card full-width" style="overflow-x:auto;">
+                    <div class="widget-header">
+                        <h3>Corporate Client Directory</h3>
+                    </div>
+                    <div class="search-bar">
+                        <i class="fas fa-magnifying-glass"></i>
+                        <input type="text" id="partnerSearch" placeholder="Search client accounts by name or email..." />
+                    </div>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Partner Company Contact</th>
+                                <th>Email Address</th>
+                                <th>Access Clearance</th>
+                                <th>Assigned Structural Lead</th>
+                                <th>Active Projects</th>
+                            </tr>
+                        </thead>
+                        <tbody id="partnersTable">
+                            <tr>
+                                <td>Jane Doe</td>
+                                <td>jane@company.com</td>
+                                <td>Client Partner</td>
+                                <td>Alex M.</td>
+                                <td>3 active</td>
+                            </tr>
+                            <tr>
+                                <td>Mark R.</td>
+                                <td>mark@tea.com</td>
+                                <td>Client Partner</td>
+                                <td>Alex M.</td>
+                                <td>1 active</td>
+                            </tr>
+                            <tr>
+                                <td>Sarah Kelly</td>
+                                <td>sarah@bioglow.com</td>
+                                <td>Client Partner</td>
+                                <td>Teresa O.</td>
+                                <td>1 active</td>
+                            </tr>
+                            <tr>
+                                <td>Alex Vance</td>
+                                <td>vance@stellar.com</td>
+                                <td>Client Partner</td>
+                                <td>Alex M.</td>
+                                <td>2 active</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- SECTION 5: OPERATIONS -->
+            <section class="dashboard-section" id="sect-operations">
+                <div class="widget-card full-width">
+                    <div class="widget-header">
+                        <h3>Operations Parameters Configuration</h3>
+                    </div>
+                    <div class="settings-list">
+                        <div class="settings-item">
+                            <div class="settings-info">
+                                <h5>Automated MOQ Check Rule</h5>
+                                <p>Reject specs volume submissions falling below 500 MOQ limit</p>
+                            </div>
+                            <label class="switch">
+                                <input type="checkbox" checked />
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+                        <div class="settings-item">
+                            <div class="settings-info">
+                                <h5>Designer Direct Notify</h5>
+                                <p>Automated internal Slack alert when client uploads vector layers</p>
+                            </div>
+                            <label class="switch">
+                                <input type="checkbox" checked />
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+                        <div class="settings-item">
+                            <div class="settings-info">
+                                <h5>CAD Dieline Validation checks</h5>
+                                <p>Auto-check perimeter cuts dimensions ratio tolerances</p>
+                            </div>
+                            <label class="switch">
+                                <input type="checkbox" />
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+                        <div class="settings-item">
+                            <div class="settings-info">
+                                <h5>Encrypted Backup Snapshots</h5>
+                                <p>Save project dieline databases on off-site servers every 12 hours</p>
+                            </div>
+                            <label class="switch">
+                                <input type="checkbox" checked />
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- SCRIPTS -->
+    <script>
+    function updateInquiryStatus(userId, status) {
+        const badge = document.getElementById(`badge-${userId}`);
+        const actionsCell = document.getElementById(`actions-${userId}`);
+        const countBadge = document.getElementById('quotesCount');
+
+        if (status === 'approved') {
+            badge.className = 'status-badge approved';
+            badge.textContent = 'Approved';
+            actionsCell.innerHTML = 'PROCESSED';
+            actionsCell.style.color = 'var(--text-muted)';
+            actionsCell.style.fontFamily = 'var(--font-alt)';
+            actionsCell.style.fontSize = '0.8rem';
+            if (countBadge) {
+                const currentCount = parseInt(countBadge.textContent) || 15;
+                countBadge.textContent = (currentCount - 1).toString();
+            }
+        } else if (status === 'declined') {
+            badge.className = 'status-badge declined';
+            badge.textContent = 'Declined';
+            actionsCell.innerHTML = 'DECLINED';
+            actionsCell.style.color = '#ef4444';
+            actionsCell.style.fontFamily = 'var(--font-alt)';
+            actionsCell.style.fontSize = '0.8rem';
+            if (countBadge) {
+                const currentCount = parseInt(countBadge.textContent) || 15;
+                countBadge.textContent = (currentCount - 1).toString();
+            }
+        }
+    }
+
+    (function() {
+        'use strict';
+
+        // TABS SWITCHING
+        function switchSection(targetSect) {
+            const sections = document.querySelectorAll('.dashboard-section');
+            const menuItems = document.querySelectorAll('.menu-item, .mobile-menu-item');
+
+            menuItems.forEach(item => {
+                if (item.getAttribute('data-target') === targetSect) {
+                    item.classList.add('active');
+                } else {
+                    item.classList.remove('active');
+                }
+            });
+
+            sections.forEach(sect => {
+                if (sect.id === `sect-${targetSect}`) {
+                    sect.style.display = 'flex';
+                    gsap.fromTo(sect, { opacity: 0, y: 15 }, { opacity: 1, y: 0, duration: 0.5, ease: 'power2.out' });
+                    sect.classList.add('active');
+
+                    if (targetSect === 'inventory') {
+                        document.querySelectorAll('.progress-bar-fill').forEach(bar => {
+                            const prog = bar.getAttribute('data-progress');
+                            bar.style.width = prog + '%';
+                        });
+                    }
+                    if (targetSect === 'overview') {
+                        document.querySelectorAll('.bar-fill').forEach(bar => {
+                            const ht = bar.getAttribute('data-height');
+                            bar.style.height = ht;
+                        });
+                    }
+                } else {
+                    sect.style.display = 'none';
+                    sect.classList.remove('active');
+                }
+            });
+        }
+
+        // INIT ANIMATIONS
+        document.addEventListener('DOMContentLoaded', () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            const username = urlParams.get('username') || 'Admin';
+            const capitalizedUsername = username.charAt(0).toUpperCase() + username.slice(1);
+            document.getElementById('usernameDisplay').textContent = capitalizedUsername;
+            document.getElementById('profileNameDisplay').textContent = capitalizedUsername;
+            document.getElementById('avatarDisplay').textContent = capitalizedUsername.substring(0, 2).toUpperCase();
+
+            document.querySelectorAll('.menu-item, .mobile-menu-item').forEach(item => {
+                item.addEventListener('click', (e) => {
+                    const target = item.getAttribute('data-target');
+                    if (target) {
+                        e.preventDefault();
+                        switchSection(target);
+                        const mobileOverlay = document.getElementById('mobileOverlay');
+                        const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+                        if (mobileOverlay.classList.contains('active')) {
+                            mobileOverlay.classList.remove('active');
+                            mobileMenuBtn.classList.remove('active');
+                        }
+                    }
+                });
+            });
+
+            const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+            const mobileOverlay = document.getElementById('mobileOverlay');
+            mobileMenuBtn.addEventListener('click', () => {
+                mobileMenuBtn.classList.toggle('active');
+                mobileOverlay.classList.toggle('active');
+            });
+
+            gsap.from('.sidebar', { x: -80, opacity: 0, duration: 0.8, ease: 'power3.out' });
+            gsap.from('.content-top-header', { y: -20, opacity: 0, duration: 0.8, ease: 'power3.out', delay: 0.2 });
+
+            document.querySelectorAll('.bar-fill').forEach(bar => {
+                const ht = bar.getAttribute('data-height');
+                bar.style.height = ht;
+            });
+
+            const searchInput = document.getElementById('partnerSearch');
+            const tableRows = document.querySelectorAll('#partnersTable tr');
+            searchInput.addEventListener('input', () => {
+                const query = searchInput.value.toLowerCase().trim();
+                tableRows.forEach(row => {
+                    const name = row.cells[0].textContent.toLowerCase();
+                    const email = row.cells[1].textContent.toLowerCase();
+                    if (name.includes(query) || email.includes(query)) {
+                        row.style.display = '';
+                    } else {
+                        row.style.display = 'none';
+                    }
+                });
+            });
+        });
+    })();
+    </script>
+
+</body>
+</html>

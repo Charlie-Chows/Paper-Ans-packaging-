@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Login | Artic Paper</title>
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+
+    <!-- GSAP -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+
+    <style>
+        /* ============================================================
+           ROOT & PREMIUM DARK-GOLD THEME
+           ============================================================ */
+        :root {
+            --bg-dark: #0a0a0a;
+            --bg-darker: #050505;
+            --card-dark: #121212;
+            --white: #ffffff;
+            --text-muted: rgba(255, 255, 255, 0.5);
+            --border: rgba(255, 255, 255, 0.06);
+            --gold: #c8a55c;
+            --gold-light: #e2cc8f;
+            --gold-dark: #a6843a;
+            --gold-glow: rgba(200, 165, 92, 0.12);
+            --radius: 20px;
+            --radius-sm: 12px;
+            --radius-xs: 8px;
+            --radius-full: 9999px;
+            --font-body: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            --font-alt: 'Space Grotesk', sans-serif;
+            --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+        html, body {
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background: var(--bg-dark);
+            color: var(--white);
+            font-family: var(--font-body);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+
+        /* Ambient Glows */
+        .ambient-glow {
+            position: absolute; border-radius: 50%; filter: blur(120px); pointer-events: none; z-index: 0;
+        }
+        .glow-1 { width: 500px; height: 500px; background: rgba(200, 165, 92, 0.05); top: -200px; right: -100px; }
+        .glow-2 { width: 400px; height: 400px; background: rgba(200, 165, 92, 0.03); bottom: -150px; left: -100px; }
+
+        .grain { position: absolute; inset: 0; background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E"); pointer-events: none; z-index: 0; opacity: 0.15; }
+
+        /* ============================================================
+           LOGIN CARD
+           ============================================================ */
+        .login-card {
+            background: var(--card-dark);
+            border: 1px solid var(--border);
+            padding: 48px;
+            border-radius: var(--radius);
+            width: 100%;
+            max-width: 440px;
+            box-shadow: 0 24px 80px rgba(0, 0, 0, 0.4);
+            position: relative;
+            z-index: 2;
+            opacity: 0;
+            transform: translateY(30px);
+        }
+
+        .login-logo {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 24px;
+        }
+        .login-logo img {
+            height: 75px;
+            width: auto;
+            border-radius: 8px;
+            filter: brightness(0) saturate(100%) invert(78%) sepia(45%) saturate(600%) hue-rotate(350deg) brightness(105%) contrast(100%);
+        }
+
+        .login-header {
+            text-align: center;
+            margin-bottom: 28px;
+        }
+        .login-header h2 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 6px;
+            color: var(--white);
+        }
+        .login-header p {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin-bottom: 20px;
+        }
+        .form-group label {
+            font-family: var(--font-alt);
+            font-size: 0.72rem;
+            text-transform: uppercase;
+            font-weight: 700;
+            color: var(--text-muted);
+            letter-spacing: 0.5px;
+        }
+        .form-control {
+            border: 1px solid var(--border);
+            border-radius: var(--radius-xs);
+            padding: 12px 16px;
+            font-family: inherit;
+            font-size: 0.92rem;
+            color: var(--white);
+            background: rgba(255, 255, 255, 0.02);
+            transition: all 0.4s var(--ease-out-expo);
+        }
+        .form-control:focus {
+            outline: none;
+            border-color: var(--gold);
+            background: rgba(255, 255, 255, 0.04);
+            box-shadow: 0 0 0 4px var(--gold-glow);
+        }
+
+        /* CUSTOM DROPDOWN STYLING */
+        .custom-dropdown {
+            position: relative;
+            width: 100%;
+            user-select: none;
+        }
+        .dropdown-trigger {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border: 1px solid var(--border);
+            border-radius: var(--radius-xs);
+            padding: 12px 16px;
+            font-size: 0.92rem;
+            color: var(--white);
+            background: rgba(255, 255, 255, 0.02);
+            cursor: pointer;
+            transition: all 0.4s var(--ease-out-expo);
+        }
+        .dropdown-trigger:hover, .custom-dropdown.active .dropdown-trigger {
+            border-color: var(--gold);
+            background: rgba(255, 255, 255, 0.04);
+            box-shadow: 0 0 0 4px var(--gold-glow);
+        }
+        .dropdown-trigger i {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            transition: transform 0.3s var(--ease-out-expo);
+        }
+        .custom-dropdown.active .dropdown-trigger i {
+            transform: rotate(180deg);
+        }
+        .dropdown-options {
+            position: absolute;
+            top: calc(100% + 8px);
+            left: 0;
+            width: 100%;
+            background: #181818;
+            border: 1px solid var(--border);
+            border-radius: var(--radius-xs);
+            overflow: hidden;
+            z-index: 100;
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(-10px);
+            transition: all 0.3s var(--ease-out-expo);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+        }
+        .custom-dropdown.active .dropdown-options {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+        .dropdown-option {
+            padding: 12px 16px;
+            font-size: 0.92rem;
+            color: var(--text-muted);
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .dropdown-option:hover {
+            background: rgba(200, 165, 92, 0.08);
+            color: var(--gold-light);
+        }
+        .dropdown-option.selected {
+            background: rgba(200, 165, 92, 0.15);
+            color: var(--gold);
+            font-weight: 700;
+        }
+
+        .form-options {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.8rem;
+            margin-bottom: 24px;
+        }
+        .form-options label {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--text-muted);
+            cursor: pointer;
+        }
+        .form-options input[type="checkbox"] {
+            accent-color: var(--gold);
+        }
+        .forgot-link {
+            color: var(--gold-light);
+            transition: color 0.3s;
+            text-decoration: none;
+        }
+        .forgot-link:hover {
+            color: var(--gold);
+            text-decoration: underline;
+        }
+
+        .btn-submit {
+            width: 100%;
+            padding: 14px;
+            border-radius: var(--radius-full);
+            background: linear-gradient(135deg, var(--gold), var(--gold-dark));
+            border: none;
+            color: var(--white);
+            font-family: var(--font-alt);
+            font-weight: 700;
+            font-size: 0.88rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            cursor: pointer;
+            transition: all 0.3s var(--ease-out-expo);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+        .btn-submit:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(200, 165, 92, 0.25);
+        }
+
+        .social-divider {
+            position: relative;
+            text-align: center;
+            margin: 24px 0;
+            font-size: 0.72rem;
+            font-family: var(--font-alt);
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            color: var(--text-muted);
+        }
+        .social-divider::before, .social-divider::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            width: 30%;
+            height: 1px;
+            background: var(--border);
+        }
+        .social-divider::before { left: 0; }
+        .social-divider::after { right: 0; }
+
+        .social-logins {
+            display: flex;
+            gap: 16px;
+            justify-content: center;
+            margin-bottom: 24px;
+        }
+        .social-btn {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid var(--border);
+            color: var(--text-muted);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: all 0.4s var(--ease-out-expo);
+            text-decoration: none !important;
+        }
+        .social-btn:hover {
+            background: rgba(200, 165, 92, 0.08);
+            color: var(--gold);
+            border-color: rgba(200, 165, 92, 0.2);
+            transform: translateY(-2px);
+        }
+
+        .register-prompt {
+            text-align: center;
+            font-size: 0.82rem;
+            color: var(--text-muted);
+            font-weight: 400;
+        }
+        .register-prompt a {
+            color: var(--gold-light);
+            font-weight: 700;
+            transition: color 0.3s;
+            text-decoration: none;
+        }
+        .register-prompt a:hover {
+            color: var(--gold);
+            text-decoration: underline;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="grain"></div>
+    <div class="ambient-glow glow-1"></div>
+    <div class="ambient-glow glow-2"></div>
+
+    <div class="login-card" id="loginCard">
+        <div class="login-logo">
+            <a href="index.html"><img src="logo.webp" alt="Artic Paper" /></a>
+        </div>
+        <div class="login-header">
+            <h2>Portal Sign In</h2>
+            <p>Access your packaging console dashboard</p>
+        </div>
+
+        <form id="loginForm" onsubmit="handleLoginSubmit(event)">
+            <div class="form-group">
+                <label for="emailInput">Corporate Email</label>
+                <input type="email" id="emailInput" class="form-control" placeholder="name@company.com" required />
+            </div>
+
+            <div class="form-group">
+                <label for="passwordInput">Password</label>
+                <input type="password" id="passwordInput" class="form-control" placeholder="••••••••" required />
+            </div>
+
+            <div class="form-group">
+                <label>Portal Role</label>
+                <div class="custom-dropdown" id="roleDropdown">
+                    <div class="dropdown-trigger" id="dropdownTrigger">
+                        <span id="selectedValue">Select Access Role</span>
+                        <i class="fas fa-chevron-down"></i>
+                    </div>
+                    <div class="dropdown-options">
+                        <div class="dropdown-option" data-value="user">Client Partner Portal</div>
+                        <div class="dropdown-option" data-value="admin">Admin Console</div>
+                    </div>
+                </div>
+                <input type="hidden" id="roleInput" name="role" required />
+            </div>
+
+            <div class="form-options">
+                <label>
+                    <input type="checkbox" id="rememberMe" /> Remember session
+                </label>
+                <a href="404.html" class="forgot-link">Forgot?</a>
+            </div>
+
+            <button type="submit" class="btn-submit">
+                <span>Enter Portal</span>
+                <i class="fas fa-arrow-right-to-bracket"></i>
+            </button>
+        </form>
+
+        <div class="social-divider">Or credentials access</div>
+
+        <div class="social-logins">
+            <a href="404.html" class="social-btn"><i class="fab fa-google"></i></a>
+            <a href="404.html" class="social-btn"><i class="fab fa-microsoft"></i></a>
+        </div>
+
+        <div class="register-prompt">
+            New partner? <a href="signup.html">Register Account</a>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Animate card entrance
+            gsap.to('#loginCard', { opacity: 1, y: 0, duration: 1, ease: 'power4.out' });
+
+            // Custom dropdown script
+            const dropdown = document.getElementById('roleDropdown');
+            const trigger = document.getElementById('dropdownTrigger');
+            const valueSpan = document.getElementById('selectedValue');
+            const hiddenInput = document.getElementById('roleInput');
+            const options = dropdown.querySelectorAll('.dropdown-option');
+
+            trigger.addEventListener('click', (e) => {
+                e.stopPropagation();
+                dropdown.classList.toggle('active');
+            });
+
+            options.forEach(opt => {
+                opt.addEventListener('click', () => {
+                    options.forEach(o => o.classList.remove('selected'));
+                    opt.classList.add('selected');
+                    valueSpan.textContent = opt.textContent;
+                    hiddenInput.value = opt.getAttribute('data-value');
+                    dropdown.classList.remove('active');
+                });
+            });
+
+            document.addEventListener('click', () => {
+                dropdown.classList.remove('active');
+            });
+        });
+
+        function handleLoginSubmit(e) {
+            e.preventDefault();
+            const email = document.getElementById('emailInput').value;
+            const role = document.getElementById('roleInput').value;
+
+            if (!role) {
+                alert('Please select an access role.');
+                return;
+            }
+
+            // Extract username from email
+            const username = email.split('@')[0];
+
+            // Redirect based on role
+            if (role === 'admin') {
+                window.location.href = `admin.html?username=${encodeURIComponent(username)}`;
+            } else {
+                window.location.href = `user.html?username=${encodeURIComponent(username)}`;
+            }
+        }
+    </script>
+</body>
+
+</html>

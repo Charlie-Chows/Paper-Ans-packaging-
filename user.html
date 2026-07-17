@@ -1,0 +1,1555 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0" />
+    <title>Client Portal | Artic Paper</title>
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Space+Grotesk:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+
+    <!-- GSAP -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+
+    <style>
+        /* ============================================================
+           ROOT & BEIGE THEME
+           ============================================================ */
+        :root {
+            --bg-beige: #f5f2eb;
+            --bg-light: #faf8f5;
+            --white: #ffffff;
+            --text-dark: #1e293b;
+            --text-muted: #64748b;
+            --accent: #0f766e; /* Deep active teal */
+            --accent-light: #14b8a6;
+            --accent-dark: #115e59;
+            --accent-glow: rgba(13, 148, 136, 0.08);
+            --border: rgba(0, 0, 0, 0.06);
+            --radius: 16px;
+            --radius-sm: 10px;
+            --radius-xs: 6px;
+            --radius-full: 9999px;
+            --font-body: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            --font-alt: 'Space Grotesk', sans-serif;
+            --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+        html, body {
+            width: 100%;
+            height: 100%;
+            overflow-x: hidden;
+            background: var(--bg-beige);
+            color: var(--text-dark);
+            font-family: var(--font-body);
+            -webkit-font-smoothing: antialiased;
+        }
+
+        .app-layout {
+            display: flex;
+            height: 100vh;
+            width: 100vw;
+            overflow: hidden;
+            position: relative;
+        }
+
+        /* Sidebar - Desktop */
+        .sidebar {
+            width: 280px;
+            background: var(--white);
+            border-right: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            padding: 36px 24px;
+            flex-shrink: 0;
+            z-index: 100;
+        }
+        .sidebar-logo {
+            margin-bottom: 48px;
+            display: flex;
+            justify-content: center;
+        }
+        .sidebar-logo img {
+            height: 80px;
+            width: auto;
+            border-radius: 8px;
+            filter: brightness(0) saturate(100%) invert(35%) sepia(35%) saturate(1500%) hue-rotate(135deg) brightness(95%) contrast(90%);
+        }
+        .sidebar-menu {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            flex: 1;
+        }
+        .menu-item {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            padding: 14px 20px;
+            color: var(--text-muted);
+            font-family: var(--font-alt);
+            font-size: 0.88rem;
+            font-weight: 500;
+            border-radius: var(--radius-sm);
+            transition: all 0.3s;
+            cursor: pointer;
+            text-decoration: none;
+        }
+        .menu-item i {
+            font-size: 1.1rem;
+            width: 20px;
+            text-align: center;
+        }
+        .menu-item:hover, .menu-item.active {
+            color: var(--accent);
+            background: var(--accent-glow);
+        }
+        .menu-item.active {
+            color: var(--accent-dark);
+            font-weight: 700;
+            box-shadow: inset 3px 0 0 var(--accent);
+        }
+        .sidebar-footer {
+            border-top: 1px solid var(--border);
+            padding-top: 24px;
+        }
+        .logout-btn {
+            color: #ef4444 !important;
+            text-decoration: none;
+        }
+        .logout-btn:hover {
+            background: rgba(239, 68, 68, 0.06) !important;
+            color: #dc2626 !important;
+        }
+
+        /* Mobile Header */
+        .mobile-header {
+            display: none;
+            height: 80px;
+            background: var(--white);
+            border-bottom: 1px solid var(--border);
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 24px;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            z-index: 200;
+        }
+        .mobile-header .logo img {
+            height: 70px;
+            width: auto;
+            border-radius: 6px;
+            filter: brightness(0) saturate(100%) invert(35%) sepia(35%) saturate(1500%) hue-rotate(135deg) brightness(95%) contrast(90%);
+        }
+        .hamburger-btn {
+            background: rgba(0,0,0,0.02);
+            border: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+            cursor: pointer;
+            padding: 10px;
+            border-radius: var(--radius-xs);
+        }
+        .hamburger-btn span {
+            display: block;
+            width: 20px;
+            height: 2px;
+            background: var(--text-dark);
+            transition: 0.3s;
+        }
+        .hamburger-btn.active span:nth-child(1) { transform: rotate(45deg) translate(5px, 5px); }
+        .hamburger-btn.active span:nth-child(2) { opacity: 0; }
+        .hamburger-btn.active span:nth-child(3) { transform: rotate(-45deg) translate(5px, -5px); }
+
+        /* Mobile Menu Overlay */
+        .mobile-menu-overlay {
+            position: fixed;
+            inset: 0;
+            top: 80px;
+            background: var(--bg-beige);
+            z-index: 190;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+            padding: 40px 24px;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.4s var(--ease-out-expo);
+            overflow-y: auto;
+        }
+        .mobile-menu-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+        .mobile-menu {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+        .mobile-menu-item {
+            font-family: var(--font-alt);
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            padding: 14px 20px;
+            border-radius: var(--radius-sm);
+            background: var(--white);
+            border: 1px solid var(--border);
+            text-decoration: none;
+        }
+        .mobile-menu-item.active {
+            color: var(--accent);
+            border-color: var(--accent);
+            background: var(--accent-glow);
+        }
+        .mobile-menu-overlay .logout-btn-mobile {
+            margin-top: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            padding: 16px;
+            background: #ef4444;
+            color: var(--white) !important;
+            font-family: var(--font-alt);
+            font-weight: 700;
+            text-transform: uppercase;
+            font-size: 0.9rem;
+            letter-spacing: 1px;
+            border-radius: var(--radius-full);
+            text-decoration: none !important;
+            box-shadow: 0 4px 12px rgba(239, 68, 68, 0.2);
+            transition: background 0.3s;
+        }
+        .mobile-menu-overlay .logout-btn-mobile:hover {
+            background: #dc2626;
+        }
+
+        /* Content Area */
+        .content-area {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            overflow-y: auto;
+            padding: 48px;
+            position: relative;
+            max-width: 100%;
+            overflow-x: hidden;
+        }
+
+        /* Top Header Details */
+        .content-top-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 40px;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 24px;
+        }
+        .welcome-hero h1 {
+            font-size: 2.2rem;
+            font-weight: 800;
+            color: var(--text-dark);
+            letter-spacing: -0.5px;
+        }
+        .welcome-hero h1 span {
+            color: var(--accent);
+        }
+        .welcome-hero p {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            margin-top: 4px;
+            font-weight: 400;
+        }
+
+        .user-profile {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+        .user-avatar {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            background: var(--accent-glow);
+            border: 1px solid var(--accent);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--accent);
+            font-weight: 700;
+            font-family: var(--font-alt);
+        }
+        .user-info-text h4 {
+            font-size: 0.95rem;
+            font-weight: 700;
+            color: var(--text-dark);
+        }
+        .user-info-text p {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+        }
+
+        /* Sections Switch styling */
+        .dashboard-section {
+            display: none;
+            flex-direction: column;
+            gap: 32px;
+            opacity: 0;
+            width: 100%;
+        }
+        .dashboard-section.active {
+            display: flex;
+            opacity: 1;
+        }
+
+        /* ============================================================
+           DASHBOARD WIDGETS & CARDS
+           ============================================================ */
+        .widget-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 24px;
+            width: 100%;
+        }
+        .widget-card {
+            background: var(--white);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 28px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.015);
+        }
+        .widget-card.full-width {
+            grid-column: span 4;
+        }
+        .widget-card.two-thirds {
+            grid-column: span 2;
+        }
+        .widget-card.three-quarters {
+            grid-column: span 3;
+        }
+
+        .widget-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 14px;
+        }
+        .widget-header h3 {
+            font-size: 1.15rem;
+            font-weight: 700;
+            color: var(--text-dark);
+        }
+
+        /* Stats Blocks */
+        .stats-block {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+        .stats-icon {
+            width: 56px;
+            height: 56px;
+            border-radius: var(--radius-sm);
+            background: var(--accent-glow);
+            color: var(--accent);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.4rem;
+        }
+        .stats-details h3 {
+            font-size: 1.8rem;
+            font-family: var(--font-alt);
+            font-weight: 700;
+            color: var(--text-dark);
+        }
+        .stats-details p {
+            font-size: 0.72rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-top: 4px;
+            font-weight: 600;
+        }
+
+        /* Clean modern table */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.88rem;
+            text-align: left;
+        }
+        th, td {
+            padding: 14px 16px;
+            border-bottom: 1px solid var(--border);
+        }
+        th {
+            font-family: var(--font-alt);
+            font-size: 0.72rem;
+            text-transform: uppercase;
+            color: var(--text-muted);
+            letter-spacing: 0.5px;
+            font-weight: 700;
+        }
+        td {
+            font-weight: 400;
+            color: var(--text-dark);
+        }
+
+        /* Flat Column Bar Graph */
+        .bar-chart-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            height: 220px;
+            padding: 20px 10px 10px;
+        }
+        .bar-wrapper {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            flex: 1;
+            height: 100%;
+            justify-content: flex-end;
+            gap: 8px;
+        }
+        .bar-track {
+            width: 32px;
+            height: 100%;
+            background: var(--bg-beige);
+            border-radius: var(--radius-xs);
+            display: flex;
+            align-items: flex-end;
+            overflow: hidden;
+            position: relative;
+        }
+        .bar-fill {
+            width: 100%;
+            background: linear-gradient(180deg, var(--accent-light) 0%, var(--accent) 100%);
+            height: 0;
+            transition: height 1.2s var(--ease-out-expo);
+            border-radius: var(--radius-xs) var(--radius-xs) 0 0;
+        }
+        .bar-value {
+            font-size: 0.7rem;
+            font-weight: 700;
+            color: var(--accent-dark);
+            margin-bottom: 2px;
+            font-family: var(--font-alt);
+        }
+        .bar-label {
+            font-size: 0.72rem;
+            color: var(--text-muted);
+            font-family: var(--font-alt);
+            font-weight: 600;
+        }
+
+        /* Material circular metric block */
+        .donut-container {
+            display: flex;
+            align-items: center;
+            justify-content: space-around;
+            height: 220px;
+        }
+        .donut-legend {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 0.82rem;
+            color: var(--text-dark);
+            font-weight: 500;
+        }
+        .legend-color {
+            width: 12px;
+            height: 12px;
+            border-radius: 3px;
+        }
+
+        /* Pipeline / Projects styling */
+        .pipeline-list {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        .pipeline-item {
+            background: var(--bg-light);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 24px;
+        }
+        .pipeline-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        .pipeline-meta h4 {
+            font-size: 1.05rem;
+            font-weight: 700;
+            color: var(--text-dark);
+        }
+        .pipeline-meta p {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+        }
+        .status-badge {
+            font-family: var(--font-alt);
+            font-size: 0.65rem;
+            text-transform: uppercase;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+            padding: 6px 14px;
+            border-radius: var(--radius-full);
+            background: var(--accent-glow);
+            color: var(--accent-dark);
+            border: 1px solid rgba(15, 118, 110, 0.15);
+        }
+        .status-badge.shipped {
+            background: rgba(8, 145, 178, 0.1);
+            color: #0e7490;
+            border-color: rgba(8, 145, 178, 0.2);
+        }
+        .status-badge.concept {
+            background: rgba(0,0,0,0.03);
+            color: var(--text-muted);
+            border-color: var(--border);
+        }
+        .progress-bar-track {
+            height: 6px;
+            background: var(--border);
+            border-radius: 10px;
+            overflow: hidden;
+            margin-bottom: 12px;
+        }
+        .progress-bar-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--accent), var(--accent-light));
+            border-radius: 10px;
+            width: 0;
+            transition: width 1.5s var(--ease-out-expo);
+        }
+
+        .checklist-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+            gap: 12px;
+            margin-top: 16px;
+            border-top: 1px solid var(--border);
+            padding-top: 12px;
+        }
+        .checklist-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.78rem;
+            color: var(--text-muted);
+            white-space: normal;
+            word-break: break-word;
+        }
+        .checklist-item i {
+            color: var(--accent);
+            font-size: 0.85rem;
+            flex-shrink: 0;
+        }
+        .checklist-item.done {
+            color: var(--accent-dark);
+            font-weight: 600;
+        }
+        .checklist-item.done i {
+            color: var(--accent-light);
+        }
+
+        /* Upload Zone */
+        .upload-zone {
+            border: 2px dashed var(--border);
+            border-radius: var(--radius);
+            padding: 60px 40px;
+            text-align: center;
+            background: var(--bg-light);
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .upload-zone:hover {
+            border-color: var(--accent);
+            background: var(--accent-glow);
+        }
+        .upload-zone i {
+            font-size: 3rem;
+            color: var(--text-muted);
+            margin-bottom: 20px;
+        }
+        .upload-zone h4 {
+            font-size: 1.1rem;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+        .upload-zone p {
+            font-size: 0.82rem;
+            color: var(--text-muted);
+        }
+
+        .btn-download {
+            padding: 6px 12px;
+            font-family: var(--font-alt);
+            font-size: 0.72rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--accent-dark);
+            border: 1px solid rgba(15, 118, 110, 0.2);
+            border-radius: var(--radius-xs);
+            background: var(--accent-glow);
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .btn-download:hover {
+            background: var(--accent);
+            color: var(--white);
+        }
+
+        /* Calculator layout */
+        .calculator-layout {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 40px;
+        }
+        .calc-form {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        .input-row {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 16px;
+        }
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        .form-group label {
+            font-family: var(--font-alt);
+            font-size: 0.72rem;
+            text-transform: uppercase;
+            color: var(--text-muted);
+            letter-spacing: 0.5px;
+            font-weight: 700;
+        }
+        .form-control {
+            border: 1px solid var(--border);
+            border-radius: var(--radius-xs);
+            padding: 12px 16px;
+            font-family: inherit;
+            font-size: 0.92rem;
+            color: var(--text-dark);
+            background: var(--white);
+            transition: all 0.4s var(--ease-out-expo);
+        }
+        .form-control:focus {
+            outline: none;
+            border-color: var(--accent);
+            background: var(--white);
+            box-shadow: 0 0 0 4px rgba(13, 148, 136, 0.15);
+        }
+        .calc-results {
+            background: var(--bg-light);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 32px;
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+            justify-content: center;
+        }
+        .result-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 12px;
+        }
+        .result-item h5 {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            font-family: var(--font-alt);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-weight: 700;
+        }
+        .result-item span {
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: var(--accent-dark);
+            font-family: var(--font-alt);
+        }
+
+        .btn-submit-quote {
+            width: 100%;
+            padding: 14px;
+            border-radius: var(--radius-full);
+            background: linear-gradient(135deg, var(--accent), var(--accent-dark));
+            border: none;
+            color: var(--white);
+            font-family: var(--font-alt);
+            font-weight: 700;
+            font-size: 0.88rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            cursor: pointer;
+            transition: all 0.3s var(--ease-out-expo);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 12px;
+        }
+        .btn-submit-quote:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(15, 118, 110, 0.2);
+        }
+
+        /* FAQ accordion */
+        .faq-accordion {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+        .faq-item {
+            border: 1px solid var(--border);
+            border-radius: var(--radius-xs);
+            background: var(--white);
+            overflow: hidden;
+        }
+        .faq-header {
+            padding: 20px 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+        }
+        .faq-header h4 {
+            font-size: 0.95rem;
+            font-weight: 700;
+        }
+        .faq-body {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.4s var(--ease-out-expo);
+        }
+        .faq-content {
+            padding: 0 24px 20px;
+            font-size: 0.88rem;
+            color: var(--text-muted);
+            line-height: 1.6;
+        }
+        .faq-item.active .faq-body {
+            max-height: 150px;
+        }
+
+        /* Chat widget */
+        .chat-widget {
+            display: flex;
+            flex-direction: column;
+            height: 320px;
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            background: var(--bg-light);
+            overflow: hidden;
+        }
+        .chat-history {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        .chat-bubble {
+            max-width: 75%;
+            padding: 10px 16px;
+            border-radius: 12px;
+            font-size: 0.85rem;
+            line-height: 1.4;
+        }
+        .chat-bubble.bot {
+            background: var(--white);
+            border: 1px solid var(--border);
+            align-self: flex-start;
+            color: var(--text-dark);
+        }
+        .chat-bubble.user {
+            background: var(--accent);
+            color: var(--white);
+            align-self: flex-end;
+            font-weight: 500;
+        }
+        .chat-input-bar {
+            display: flex;
+            border-top: 1px solid var(--border);
+            background: var(--white);
+        }
+        .chat-input-bar input {
+            flex: 1;
+            background: transparent;
+            border: none;
+            padding: 14px 20px;
+            color: var(--text-dark);
+            font-family: inherit;
+            font-size: 0.88rem;
+        }
+        .chat-input-bar input:focus {
+            outline: none;
+        }
+        .chat-send-btn {
+            background: transparent;
+            border: none;
+            padding: 0 24px;
+            color: var(--accent);
+            cursor: pointer;
+            transition: color 0.2s;
+        }
+        .chat-send-btn:hover {
+            color: var(--accent-light);
+        }
+
+        @media (max-width: 992px) {
+            .mobile-header { display: flex; }
+            .sidebar { display: none; }
+            .app-layout { flex-direction: column; padding-top: 80px; height: 100vh; overflow-y: auto; width: 100vw; overflow-x: hidden; }
+            .content-area { padding: 32px 20px; height: auto; overflow-y: visible; }
+            .content-top-header { flex-direction: column; align-items: flex-start; gap: 16px; margin-bottom: 24px; }
+            .widget-grid { grid-template-columns: 1fr; }
+            .widget-card.full-width, .widget-card.two-thirds, .widget-card.three-quarters { grid-column: span 1; }
+            .calculator-layout { grid-template-columns: 1fr; gap: 24px; }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="app-layout">
+        <!-- Sidebar - Desktop -->
+        <aside class="sidebar">
+            <div class="sidebar-logo">
+                <a href="index.html"><img src="logo.webp" alt="Artic Paper Logo" /></a>
+            </div>
+            <nav class="sidebar-menu">
+                <div class="menu-item active" data-target="overview"><i class="fas fa-chart-pie"></i> Client Console</div>
+                <div class="menu-item" data-target="calculator"><i class="fas fa-calculator"></i> Specs Calculator</div>
+                <div class="menu-item" data-target="projects"><i class="fas fa-boxes-packing"></i> Active Orders</div>
+                <div class="menu-item" data-target="assets"><i class="fas fa-cloud-arrow-up"></i> Design Vault</div>
+                <div class="menu-item" data-target="support"><i class="fas fa-circle-question"></i> Help Desk</div>
+            </nav>
+            <div class="sidebar-footer">
+                <a href="index.html" class="menu-item logout-btn"><i class="fas fa-sign-out-alt"></i> Logout</a>
+            </div>
+        </aside>
+
+        <!-- Mobile Top Header -->
+        <header class="mobile-header">
+            <a href="index.html" class="logo"><img src="logo.webp" alt="Artic Paper Logo" /></a>
+            <button class="hamburger-btn" id="mobileMenuBtn" aria-label="Toggle Navigation">
+                <span></span><span></span><span></span>
+            </button>
+        </header>
+
+        <!-- Mobile Menu Overlay -->
+        <div class="mobile-menu-overlay" id="mobileOverlay">
+            <nav class="mobile-menu">
+                <div class="mobile-menu-item active" data-target="overview"><i class="fas fa-chart-pie"></i> Client Console</div>
+                <div class="mobile-menu-item" data-target="calculator"><i class="fas fa-calculator"></i> Specs Calculator</div>
+                <div class="mobile-menu-item" data-target="projects"><i class="fas fa-boxes-packing"></i> Active Orders</div>
+                <div class="mobile-menu-item" data-target="assets"><i class="fas fa-cloud-arrow-up"></i> Design Vault</div>
+                <div class="mobile-menu-item" data-target="support"><i class="fas fa-circle-question"></i> Help Desk</div>
+                <a href="index.html" class="logout-btn-mobile"><i class="fas fa-sign-out-alt"></i> Logout</a>
+            </nav>
+        </div>
+
+        <!-- Main Content Area -->
+        <main class="content-area">
+            <!-- Top Header Details -->
+            <div class="content-top-header">
+                <div class="welcome-hero">
+                    <h1>Hello, <span id="usernameDisplay">Jane</span></h1>
+                    <p>Structural packaging solutions & order management portal</p>
+                </div>
+                <div class="user-profile">
+                    <div class="user-avatar" id="avatarDisplay">JD</div>
+                    <div class="user-info-text">
+                        <h4 id="profileNameDisplay">Jane Doe</h4>
+                        <p>Client Partner</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SECTION 1: OVERVIEW -->
+            <section class="dashboard-section active" id="sect-overview">
+                <div class="widget-grid">
+                    <div class="widget-card">
+                        <div class="stats-block">
+                            <div class="stats-icon"><i class="fas fa-cubes"></i></div>
+                            <div class="stats-details">
+                                <h3>4</h3>
+                                <p>Active Orders</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="widget-card">
+                        <div class="stats-block">
+                            <div class="stats-icon"><i class="fas fa-clipboard-check"></i></div>
+                            <div class="stats-details">
+                                <h3>12.8k</h3>
+                                <p>Total Units</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="widget-card">
+                        <div class="stats-block">
+                            <div class="stats-icon"><i class="fas fa-phone-volume"></i></div>
+                            <div class="stats-details">
+                                <h3>Alex M.</h3>
+                                <p>Assigned Designer</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="widget-card">
+                        <div class="stats-block">
+                            <div class="stats-icon"><i class="fas fa-circle-check"></i></div>
+                            <div class="stats-details">
+                                <h3>100%</h3>
+                                <p>Proofs Approved</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Flat Column Bar Graph for Volume Order Analytics -->
+                    <div class="widget-card three-quarters">
+                        <div class="widget-header">
+                            <h3>Monthly Order Volume (Units)</h3>
+                            <span style="font-size:0.72rem;color:var(--text-muted);font-family:var(--font-alt);font-weight:700;">UNIT RUNS</span>
+                        </div>
+                        <div class="bar-chart-container" id="overviewBarChart">
+                            <div class="bar-wrapper">
+                                <div class="bar-value">1,200</div>
+                                <div class="bar-track"><div class="bar-fill" data-height="45%"></div></div>
+                                <div class="bar-label">Jan</div>
+                            </div>
+                            <div class="bar-wrapper">
+                                <div class="bar-value">2,500</div>
+                                <div class="bar-track"><div class="bar-fill" data-height="65%"></div></div>
+                                <div class="bar-label">Feb</div>
+                            </div>
+                            <div class="bar-wrapper">
+                                <div class="bar-value">4,100</div>
+                                <div class="bar-track"><div class="bar-fill" data-height="95%"></div></div>
+                                <div class="bar-label">Mar</div>
+                            </div>
+                            <div class="bar-wrapper">
+                                <div class="bar-value">1,500</div>
+                                <div class="bar-track"><div class="bar-fill" data-height="55%"></div></div>
+                                <div class="bar-label">Apr</div>
+                            </div>
+                            <div class="bar-wrapper">
+                                <div class="bar-value">3,500</div>
+                                <div class="bar-track"><div class="bar-fill" data-height="85%"></div></div>
+                                <div class="bar-label">May</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Material shares metric circle -->
+                    <div class="widget-card">
+                        <div class="widget-header">
+                            <h3>Box Type Share</h3>
+                        </div>
+                        <div class="donut-container">
+                            <svg width="100" height="100" viewBox="0 0 36 36">
+                                <circle cx="18" cy="18" r="15.915" fill="none" stroke="rgba(0,0,0,0.03)" stroke-width="3"></circle>
+                                <circle cx="18" cy="18" r="15.915" fill="none" stroke="var(--accent)" stroke-width="3" stroke-dasharray="60 40" stroke-dashoffset="25"></circle>
+                                <circle cx="18" cy="18" r="15.915" fill="none" stroke="var(--accent-dark)" stroke-width="3" stroke-dasharray="30 70" stroke-dashoffset="85"></circle>
+                                <circle cx="18" cy="18" r="15.915" fill="none" stroke="#0891b2" stroke-width="3" stroke-dasharray="10 90" stroke-dashoffset="55"></circle>
+                            </svg>
+                            <div class="donut-legend">
+                                <div class="legend-item">
+                                    <div class="legend-color" style="background:var(--accent);"></div>
+                                    <span style="font-size:0.75rem;">Rigid Boxes (60%)</span>
+                                </div>
+                                <div class="legend-item">
+                                    <div class="legend-color" style="background:var(--accent-dark);"></div>
+                                    <span style="font-size:0.75rem;">Folding Box (30%)</span>
+                                </div>
+                                <div class="legend-item">
+                                    <div class="legend-color" style="background:#0891b2;"></div>
+                                    <span style="font-size:0.75rem;">Mailers (10%)</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Recent Shipments Table -->
+                    <div class="widget-card full-width" style="overflow-x:auto;">
+                        <div class="widget-header">
+                            <h3>Package Delivery Log</h3>
+                        </div>
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Shipment ID</th>
+                                    <th>Carrier</th>
+                                    <th>Status</th>
+                                    <th style="text-align:right;">Quantity Sent</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>#SH-4890</td>
+                                    <td>DHL Express</td>
+                                    <td><span style="color:#0f766e;font-weight:700;"><i class="fas fa-circle-check"></i> Delivered</span></td>
+                                    <td style="text-align:right;color:var(--text-dark);font-weight:700;">2,500 Units</td>
+                                </tr>
+                                <tr>
+                                    <td>#SH-4871</td>
+                                    <td>FedEx Ground</td>
+                                    <td><span style="color:#0f766e;font-weight:700;"><i class="fas fa-circle-check"></i> Delivered</span></td>
+                                    <td style="text-align:right;color:var(--text-dark);font-weight:700;">1,000 Units</td>
+                                </tr>
+                                <tr>
+                                    <td>#SH-4852</td>
+                                    <td>DHL Freight</td>
+                                    <td><span style="color:var(--accent-light);font-weight:700;"><i class="fas fa-truck-fast"></i> Out for Delivery</span></td>
+                                    <td style="text-align:right;color:var(--text-dark);font-weight:700;">5,000 Units</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- SECTION 2: CALCULATOR & QUOTE REQUEST -->
+            <section class="dashboard-section" id="sect-calculator">
+                <div class="widget-card full-width">
+                    <div class="widget-header">
+                        <h3>Custom Specs & Instant Price Estimator</h3>
+                    </div>
+                    <div class="calculator-layout">
+                        <!-- Controls -->
+                        <div class="calc-form">
+                            <div class="input-row">
+                                <div class="form-group">
+                                    <label for="length">Length (mm)</label>
+                                    <input type="number" id="length" class="form-control" value="200" min="50" />
+                                </div>
+                                <div class="form-group">
+                                    <label for="width">Width (mm)</label>
+                                    <input type="number" id="width" class="form-control" value="150" min="50" />
+                                </div>
+                                <div class="form-group">
+                                    <label for="height">Height (mm)</label>
+                                    <input type="number" id="height" class="form-control" value="80" min="20" />
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="calcMaterial">Board material Spec</label>
+                                <select id="calcMaterial" class="form-control">
+                                    <option value="kraft">Unbleached Kraft 350gsm (Standard)</option>
+                                    <option value="rigid">Laminated Greyboard 1200gsm (Luxury)</option>
+                                    <option value="sugarcane">SBS Solid Bleached Sulfate 400gsm (Premium)</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="calcPrint">Finishing & Printing Ink</label>
+                                <select id="calcPrint" class="form-control">
+                                    <option value="vegetable">Standard Offset CMYK Print</option>
+                                    <option value="foil">Metallic Foil Stamping</option>
+                                    <option value="uv">Spot UV Matte/Gloss Coating</option>
+                                </select>
+                            </div>
+                            <button class="btn-submit-quote" onclick="alert('Quote request logged successfully!')">Submit Quote Request <i class="fas fa-file-invoice"></i></button>
+                        </div>
+                        <!-- Results -->
+                        <div class="calc-results">
+                            <div class="result-item">
+                                <h5>Surface Area</h5>
+                                <span><span id="resArea">1160</span> cm²</span>
+                            </div>
+                            <div class="result-item">
+                                <h5>Volume Cap</h5>
+                                <span><span id="resVolume">2.40</span> Liters</span>
+                            </div>
+                            <div class="result-item">
+                                <h5>Unit Box Weight</h5>
+                                <span><span id="resWeight">40.6</span> g</span>
+                            </div>
+                            <div class="result-item">
+                                <h5>Est. Unit Price (MOQ 1K)</h5>
+                                <span>&euro;<span id="resPrice">0.45</span></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- SECTION 3: PROJECTS -->
+            <section class="dashboard-section" id="sect-projects">
+                <div class="widget-card full-width">
+                    <div class="widget-header">
+                        <h3>Active Structural Orders</h3>
+                    </div>
+                    <div class="pipeline-list">
+                        <!-- Project 1 -->
+                        <div class="pipeline-item">
+                            <div class="pipeline-meta">
+                                <div>
+                                    <h4>Luxury Hinged Box</h4>
+                                    <p>Project #AP-9820 &middot; Scented Perfume Packaging</p>
+                                </div>
+                                <div class="status-badge">Tooling & Die Stamp</div>
+                            </div>
+                            <div class="progress-bar-track">
+                                <div class="progress-bar-fill" data-progress="75"></div>
+                            </div>
+                            <div style="display:flex;justify-content:space-between;font-size:0.75rem;color:var(--text-muted);font-family:var(--font-alt);font-weight:600;">
+                                <span>Requirements Logged</span>
+                                <span>CAD Dieline Proof</span>
+                                <span style="color:var(--accent-dark);">Tooling Setup</span>
+                                <span>Press Production</span>
+                            </div>
+                            <div class="checklist-grid">
+                                <div class="checklist-item done"><i class="fas fa-circle-check"></i> CAD Proof Approved</div>
+                                <div class="checklist-item done"><i class="fas fa-circle-check"></i> Material Sourced</div>
+                                <div class="checklist-item done"><i class="fas fa-circle-check"></i> Sample Box Delivered</div>
+                                <div class="checklist-item"><i class="fas fa-circle"></i> Die Stamping Run</div>
+                            </div>
+                        </div>
+                        <!-- Project 2 -->
+                        <div class="pipeline-item">
+                            <div class="pipeline-meta">
+                                <div>
+                                    <h4>Corrugated Shipping Boxes</h4>
+                                    <p>Project #AP-9610 &middot; Retail Dispatch Packs</p>
+                                </div>
+                                <div class="status-badge shipped">Delivered</div>
+                            </div>
+                            <div class="progress-bar-track">
+                                <div class="progress-bar-fill" data-progress="100"></div>
+                            </div>
+                            <div style="display:flex;justify-content:space-between;font-size:0.75rem;color:var(--text-muted);font-family:var(--font-alt);font-weight:600;">
+                                <span>Requirements Logged</span>
+                                <span>CAD Dieline Proof</span>
+                                <span>Press Production</span>
+                                <span style="color:var(--accent-dark);">Delivered</span>
+                            </div>
+                            <div class="checklist-grid">
+                                <div class="checklist-item done"><i class="fas fa-circle-check"></i> CAD Proof Approved</div>
+                                <div class="checklist-item done"><i class="fas fa-circle-check"></i> Sample Box Delivered</div>
+                                <div class="checklist-item done"><i class="fas fa-circle-check"></i> Corrugation Run</div>
+                                <div class="checklist-item done"><i class="fas fa-circle-check"></i> Shipped Out</div>
+                            </div>
+                        </div>
+                        <!-- Project 3 -->
+                        <div class="pipeline-item">
+                            <div class="pipeline-meta">
+                                <div>
+                                    <h4>Rigid Cosmetics Cardboard Wraps</h4>
+                                    <p>Project #AP-9430 &middot; Lip Gloss Kits</p>
+                                </div>
+                                <div class="status-badge concept">Proofing Phase</div>
+                            </div>
+                            <div class="progress-bar-track">
+                                <div class="progress-bar-fill" data-progress="25"></div>
+                            </div>
+                            <div style="display:flex;justify-content:space-between;font-size:0.75rem;color:var(--text-muted);font-family:var(--font-alt);font-weight:600;">
+                                <span style="color:var(--accent);">Requirements Logged</span>
+                                <span>CAD Dieline Proof</span>
+                                <span>Tooling Setup</span>
+                                <span>Press Production</span>
+                            </div>
+                            <div class="checklist-grid">
+                                <div class="checklist-item done"><i class="fas fa-circle-check"></i> Specs Submitted</div>
+                                <div class="checklist-item"><i class="fas fa-circle"></i> CAD Structural Check</div>
+                                <div class="checklist-item"><i class="fas fa-circle"></i> Board Thickness Lock</div>
+                                <div class="checklist-item"><i class="fas fa-circle"></i> Offset Color Proof</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- SECTION 4: ASSETS -->
+            <section class="dashboard-section" id="sect-assets">
+                <div class="widget-card full-width">
+                    <div class="widget-header">
+                        <h3>Dieline Uploads & Blueprints</h3>
+                    </div>
+                    <div class="upload-zone" id="uploadZone" style="margin-bottom:32px;">
+                        <i class="fas fa-cloud-arrow-up"></i>
+                        <h4>Upload Vector Artwork / Dielines</h4>
+                        <p>Upload finalized structural vectors (AI, PDF, DXF, or CAD structures)</p>
+                    </div>
+
+                    <div class="widget-header">
+                        <h3>Standard Dieline Templates</h3>
+                    </div>
+                    <div style="overflow-x:auto;width:100%;">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Template Name</th>
+                                    <th>Style Class</th>
+                                    <th>Version</th>
+                                    <th>File Size</th>
+                                    <th style="text-align:right;">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><i class="fas fa-file-pdf" style="color:#ff5555;margin-right:8px;"></i> Hinged_Box_Proof_Template.pdf</td>
+                                    <td>Rigid Box (Hinged lid)</td>
+                                    <td>v2.1</td>
+                                    <td>3.5 MB</td>
+                                    <td style="text-align:right;"><button class="btn-download" onclick="alert('Downloading dieline template...')"><i class="fas fa-download"></i> Download</button></td>
+                                </tr>
+                                <tr>
+                                    <td><i class="fas fa-file-lines" style="color:var(--accent);margin-right:8px;"></i> Sleeve_Packaging_Guide.pdf</td>
+                                    <td>Folding Sleeve Card</td>
+                                    <td>v1.0</td>
+                                    <td>6.1 MB</td>
+                                    <td style="text-align:right;"><button class="btn-download" onclick="alert('Downloading dieline template...')"><i class="fas fa-download"></i> Download</button></td>
+                                </tr>
+                                <tr>
+                                    <td><i class="fas fa-file-zipper" style="color:#0891b2;margin-right:8px;"></i> CAD_AutoLock_Bottom.zip</td>
+                                    <td>Auto-Lock Bottom Carton</td>
+                                    <td>v1.4</td>
+                                    <td>12.2 MB</td>
+                                    <td style="text-align:right;"><button class="btn-download" onclick="alert('Downloading dieline template...')"><i class="fas fa-download"></i> Download</button></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- SECTION 5: SUPPORT -->
+            <section class="dashboard-section" id="sect-support">
+                <div class="widget-grid">
+                    <div class="widget-card two-thirds">
+                        <div class="widget-header">
+                            <h3>Frequently Asked Specifications</h3>
+                        </div>
+                        <div class="faq-accordion" style="margin-bottom:24px;">
+                            <div class="faq-item">
+                                <div class="faq-header">
+                                    <h4>What is the standard MOQ (Minimum Order Quantity)?</h4>
+                                    <i class="fas fa-plus"></i>
+                                </div>
+                                <div class="faq-body">
+                                    <div class="faq-content">
+                                        For custom folding carton boxes, our MOQ is 1,000 units. For high-end luxury rigid boxes, our MOQ is 500 units.
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="faq-item">
+                                <div class="faq-header">
+                                    <h4>How do I approve structural box proofs?</h4>
+                                    <i class="fas fa-plus"></i>
+                                </div>
+                                <div class="faq-body">
+                                    <div class="faq-content">
+                                        Our engineers upload structural CAD vector proofs to the Design Vault. You can review them, request print alterations, and check status marks inside the portal.
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="faq-item">
+                                <div class="faq-header">
+                                    <h4>Can I request physical sample boxes?</h4>
+                                    <i class="fas fa-plus"></i>
+                                </div>
+                                <div class="faq-body">
+                                    <div class="faq-content">
+                                        Yes! Unprinted structural sample proofs can be ordered during the CAD verification phase to test bottle/product fitting.
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="widget-header">
+                            <h3>Structural Support Ticket Log</h3>
+                        </div>
+                        <div style="overflow-x:auto;width:100%;">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Ticket ID</th>
+                                        <th>Subject</th>
+                                        <th>Urgency</th>
+                                        <th style="text-align:right;">Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>#TK-9801</td>
+                                        <td>Dieline Alignment Proof Review</td>
+                                        <td><span style="color:#ff5555;font-weight:700;">Urgent</span></td>
+                                        <td style="text-align:right;color:#0f766e;font-weight:700;">RESOLVED</td>
+                                    </tr>
+                                    <tr>
+                                        <td>#TK-9852</td>
+                                        <td>Gloss Spot UV proofs checklist</td>
+                                        <td><span style="color:var(--accent);font-weight:700;">Normal</span></td>
+                                        <td style="text-align:right;color:var(--accent-dark);font-weight:700;">IN REVIEW</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Chat simulated widget -->
+                    <div class="widget-card">
+                        <div class="widget-header">
+                            <h3>Structural Engineer Chat</h3>
+                        </div>
+                        <div class="chat-widget">
+                            <div class="chat-history" id="chatHistory">
+                                <div class="chat-bubble bot">Hello! I am your assigned structural designer. Let me know if you need assistance matching box dimensions or fitting product inserts.</div>
+                            </div>
+                            <div class="chat-input-bar">
+                                <input type="text" id="chatInput" placeholder="Type message..." />
+                                <button class="chat-send-btn" id="chatSendBtn"><i class="fas fa-paper-plane"></i></button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- SCRIPTS -->
+    <script>
+    (function() {
+        'use strict';
+
+        // NAVIGATION TABS SWITCHING
+        function switchSection(targetSect) {
+            const sections = document.querySelectorAll('.dashboard-section');
+            const menuItems = document.querySelectorAll('.menu-item, .mobile-menu-item');
+
+            menuItems.forEach(item => {
+                if (item.getAttribute('data-target') === targetSect) {
+                    item.classList.add('active');
+                } else {
+                    item.classList.remove('active');
+                }
+            });
+
+            sections.forEach(sect => {
+                if (sect.id === `sect-${targetSect}`) {
+                    sect.style.display = 'flex';
+                    gsap.fromTo(sect, { opacity: 0, y: 15 }, { opacity: 1, y: 0, duration: 0.5, ease: 'power2.out' });
+                    sect.classList.add('active');
+                    
+                    if (targetSect === 'projects') {
+                        document.querySelectorAll('.progress-bar-fill').forEach(bar => {
+                            const prog = bar.getAttribute('data-progress');
+                            bar.style.width = prog + '%';
+                        });
+                    }
+                    if (targetSect === 'overview') {
+                        document.querySelectorAll('.bar-fill').forEach(bar => {
+                            const ht = bar.getAttribute('data-height');
+                            bar.style.height = ht;
+                        });
+                    }
+                } else {
+                    sect.style.display = 'none';
+                    sect.classList.remove('active');
+                }
+            });
+        }
+
+        // INIT ANIMATIONS
+        document.addEventListener('DOMContentLoaded', () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            const username = urlParams.get('username') || 'Jane';
+            const capitalizedUsername = username.charAt(0).toUpperCase() + username.slice(1);
+            document.getElementById('usernameDisplay').textContent = capitalizedUsername;
+            document.getElementById('profileNameDisplay').textContent = capitalizedUsername;
+            document.getElementById('avatarDisplay').textContent = capitalizedUsername.substring(0, 2).toUpperCase();
+
+            document.querySelectorAll('.menu-item, .mobile-menu-item').forEach(item => {
+                item.addEventListener('click', (e) => {
+                    const target = item.getAttribute('data-target');
+                    if (target) {
+                        e.preventDefault();
+                        switchSection(target);
+                        const mobileOverlay = document.getElementById('mobileOverlay');
+                        const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+                        if (mobileOverlay.classList.contains('active')) {
+                            mobileOverlay.classList.remove('active');
+                            mobileMenuBtn.classList.remove('active');
+                        }
+                    }
+                });
+            });
+
+            const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+            const mobileOverlay = document.getElementById('mobileOverlay');
+            mobileMenuBtn.addEventListener('click', () => {
+                mobileMenuBtn.classList.toggle('active');
+                mobileOverlay.classList.toggle('active');
+            });
+
+            gsap.from('.sidebar', { x: -80, opacity: 0, duration: 0.8, ease: 'power3.out' });
+            gsap.from('.content-top-header', { y: -20, opacity: 0, duration: 0.8, ease: 'power3.out', delay: 0.2 });
+            
+            document.querySelectorAll('.bar-fill').forEach(bar => {
+                const ht = bar.getAttribute('data-height');
+                bar.style.height = ht;
+            });
+
+            function showToast(message) {
+                let container = document.getElementById('toastContainer');
+                if (!container) {
+                    container = document.createElement('div');
+                    container.id = 'toastContainer';
+                    container.style.cssText = 'position: fixed; bottom: 24px; right: 24px; z-index: 9999; display: flex; flex-direction: column; gap: 10px; pointer-events: none;';
+                    document.body.appendChild(container);
+                }
+                const toast = document.createElement('div');
+                toast.style.cssText = 'background: #0f766e; color: #fff; padding: 16px 24px; border-radius: 12px; font-family: "Space Grotesk", sans-serif; font-size: 0.88rem; font-weight: 600; box-shadow: 0 10px 30px rgba(15, 118, 110, 0.2); opacity: 0; transform: translateY(20px); transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1); pointer-events: auto;';
+                toast.innerHTML = `<i class="fas fa-check-circle" style="margin-right: 10px; color: #14b8a6;"></i> ${message}`;
+                container.appendChild(toast);
+                setTimeout(() => {
+                    toast.style.opacity = '1';
+                    toast.style.transform = 'translateY(0)';
+                }, 50);
+                setTimeout(() => {
+                    toast.style.opacity = '0';
+                    toast.style.transform = 'translateY(-20px)';
+                    setTimeout(() => {
+                        toast.remove();
+                    }, 400);
+                }, 3000);
+            }
+
+            const uploadZone = document.getElementById('uploadZone');
+            uploadZone.addEventListener('click', () => {
+                const input = document.createElement('input');
+                input.type = 'file';
+                input.onchange = e => {
+                    const file = e.target.files[0];
+                    if (file) {
+                        showToast(`File "${file.name}" uploaded successfully!`);
+                    }
+                };
+                input.click();
+            });
+
+            const lengthInput = document.getElementById('length');
+            const widthInput = document.getElementById('width');
+            const heightInput = document.getElementById('height');
+            const selectMat = document.getElementById('calcMaterial');
+            const selectPrint = document.getElementById('calcPrint');
+
+            function runCalculator() {
+                const L = parseFloat(lengthInput.value) || 0;
+                const W = parseFloat(widthInput.value) || 0;
+                const H = parseFloat(heightInput.value) || 0;
+                const mat = selectMat.value;
+                const print = selectPrint.value;
+
+                const areaCm2 = ((L * W) + 2 * (L * H) + 2 * (W * H)) / 100;
+                document.getElementById('resArea').textContent = areaCm2.toFixed(0);
+
+                const volLiters = (L * W * H) / 1000000;
+                document.getElementById('resVolume').textContent = volLiters.toFixed(2);
+
+                let density = 0.035; // Kraft
+                if (mat === 'rigid') density = 0.12; // Rigid Greyboard
+                if (mat === 'sugarcane') density = 0.04; // SBS
+
+                const weightG = areaCm2 * density;
+                document.getElementById('resWeight').textContent = weightG.toFixed(1);
+
+                let priceFactor = 0.0039;
+                if (mat === 'rigid') priceFactor = 0.012;
+                if (mat === 'sugarcane') priceFactor = 0.0048;
+
+                let printModifier = 1.0;
+                if (print === 'foil') printModifier = 1.25;
+                if (print === 'uv') printModifier = 1.15;
+
+                const price = areaCm2 * priceFactor * printModifier;
+                document.getElementById('resPrice').textContent = price.toFixed(2);
+            }
+
+            [lengthInput, widthInput, heightInput, selectMat, selectPrint].forEach(el => {
+                el.addEventListener('input', runCalculator);
+                el.addEventListener('change', runCalculator);
+            });
+            runCalculator();
+
+            document.querySelectorAll('.faq-header').forEach(hdr => {
+                hdr.addEventListener('click', () => {
+                    const item = hdr.parentElement;
+                    const isActive = item.classList.contains('active');
+                    document.querySelectorAll('.faq-item').forEach(i => i.classList.remove('active'));
+                    if (!isActive) {
+                        item.classList.add('active');
+                    }
+                });
+            });
+
+            const chatHistory = document.getElementById('chatHistory');
+            const chatInput = document.getElementById('chatInput');
+            const chatSendBtn = document.getElementById('chatSendBtn');
+
+            function sendChatMessage() {
+                const text = chatInput.value.trim();
+                if (!text) return;
+                
+                const userBubble = document.createElement('div');
+                userBubble.className = 'chat-bubble user';
+                userBubble.textContent = text;
+                chatHistory.appendChild(userBubble);
+                chatInput.value = '';
+                chatHistory.scrollTop = chatHistory.scrollHeight;
+
+                setTimeout(() => {
+                    const botBubble = document.createElement('div');
+                    botBubble.className = 'chat-bubble bot';
+                    botBubble.textContent = "Got your message. I am opening your project dieline files now and will check the dimensions.";
+                    chatHistory.appendChild(botBubble);
+                    chatHistory.scrollTop = chatHistory.scrollHeight;
+                }, 1000);
+            }
+
+            chatSendBtn.addEventListener('click', sendChatMessage);
+            chatInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') sendChatMessage();
+            });
+        });
+    })();
+    </script>
+
+</body>
+</html>
